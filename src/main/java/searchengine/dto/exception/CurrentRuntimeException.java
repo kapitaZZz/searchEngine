@@ -1,4 +1,4 @@
-package searchengine.exception;
+package searchengine.dto.exception;
 
 public class CurrentRuntimeException extends RuntimeException {
 

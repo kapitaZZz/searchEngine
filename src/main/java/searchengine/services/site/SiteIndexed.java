@@ -7,7 +7,7 @@ import searchengine.config.SitesList;
 import searchengine.dto.IndexDto;
 import searchengine.dto.LemmaDto;
 import searchengine.dto.PageDto;
-import searchengine.exception.CurrentInterruptedException;
+import searchengine.dto.exception.CurrentInterruptedException;
 import searchengine.model.IndexModel;
 import searchengine.model.LemmaModel;
 import searchengine.model.PageModel;
@@ -40,9 +40,6 @@ public class SiteIndexed implements Callable<Boolean> {
     private final String url;
     private final SitesList sitesListConfiguration;
 
-    /**
-     * This is method start indexing sites, and set in model...
-     */
     @Override
     public Boolean call() {
         if (siteRepository.findByUrl(url) != null) {
@@ -56,7 +53,7 @@ public class SiteIndexed implements Callable<Boolean> {
         }
         log.info("Site indexing start ".concat(url).concat(" ").concat(getSiteName()) );
         SiteModelIndexing siteModelIndexing = new SiteModelIndexing();
-        SiteModel site = siteModelIndexing.getSiteModelRecord();
+        SiteModel site = siteModelIndexing.saveSiteModelRecord();
         try {
             if (!Thread.interrupted()) {
                 List<PageDto> pageDtoList;
@@ -81,10 +78,10 @@ public class SiteIndexed implements Callable<Boolean> {
                 throw new CurrentInterruptedException("Local interrupted exception.");
             }
             new LemmaIndexing().saveLemmasInLemmaDTO();
-            new AllSiteIndexing().getSiteAllIndexing(site);
+            new AllSiteIndexing().saveSiteAllIndexing(site);
         } catch (CurrentInterruptedException e) {
             log.error("WebParser stopped from ".concat(url).concat(". ").concat(e.getMessage()));
-            new SiteModelIndexing().getErrorSiteModelRecord(site);
+            new SiteModelIndexing().saveErrorSiteModelRecord(site);
         }
         return true;
     }
@@ -98,7 +95,7 @@ public class SiteIndexed implements Callable<Boolean> {
     }
 
     private class SiteModelIndexing {
-        protected SiteModel getSiteModelRecord() {
+        protected SiteModel saveSiteModelRecord() {
             SiteModel site = new SiteModel();
             site.setUrl(url);
             site.setName(getSiteName());
@@ -108,7 +105,7 @@ public class SiteIndexed implements Callable<Boolean> {
             return site;
         }
 
-        protected void getErrorSiteModelRecord(SiteModel site) {
+        protected void saveErrorSiteModelRecord(SiteModel site) {
             SiteModel sites = new SiteModel();
             sites.setLastError("WebParser stopped");
             sites.setStatus(Status.FAILED);
@@ -137,7 +134,7 @@ public class SiteIndexed implements Callable<Boolean> {
     }
 
     private class AllSiteIndexing {
-        protected void getSiteAllIndexing(SiteModel site) throws CurrentInterruptedException {
+        protected void saveSiteAllIndexing(SiteModel site) throws CurrentInterruptedException {
             if (!Thread.interrupted()) {
                 webParser.startWebParser(site);
                 List<IndexDto> indexDtoList = new CopyOnWriteArrayList<>(webParser.getConfig());
@@ -155,7 +152,6 @@ public class SiteIndexed implements Callable<Boolean> {
                 site.setStatusTime(new Date());
                 site.setStatus(Status.INDEXED);
                 siteRepository.saveAndFlush(site);
-
             } else {
                 throw new CurrentInterruptedException("Invalid getSiteAllIndexing");
             }

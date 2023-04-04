@@ -3,7 +3,7 @@ package searchengine.lemma;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import searchengine.config.LemmaConfiguration;
-import searchengine.exception.CurrentRuntimeException;
+import searchengine.dto.exception.CurrentRuntimeException;
 
 import java.io.IOException;
 import java.util.*;
@@ -47,7 +47,12 @@ public record LemmaEngine(LemmaConfiguration lemmaConfiguration) {
     private boolean isCorrectWordForm(String word) throws IOException {
         List<String> morphForm = lemmaConfiguration.russianLuceneMorphology().getMorphInfo(word);
         for (String l : morphForm) {
-            if (l.contains("ПРЕДЛ") || l.contains("СОЮЗ") || l.contains("МЕЖД") || l.contains("ВВОДН") || l.contains("ЧАСТ") || l.length() <= 3) {
+            if (l.contains("ПРЕДЛ") ||
+                    l.contains("СОЮЗ") ||
+                    l.contains("МЕЖД") ||
+                    l.contains("ВВОДН") ||
+                    l.contains("ЧАСТ") ||
+                    l.length() <= 3) {
                 return true;
             }
         }

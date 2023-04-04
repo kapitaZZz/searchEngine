@@ -1,4 +1,4 @@
-package searchengine.exception;
+package searchengine.dto.exception;
 
 import java.io.IOException;
 

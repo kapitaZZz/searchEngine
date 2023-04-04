@@ -21,6 +21,7 @@ import searchengine.repository.PageRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -33,12 +34,12 @@ public class WebParser {
     private final LemmaRepository lemmaRepository;
     private final LemmaEngine lemmaEngine;
     private List<IndexDto> config;
+    private static final float RANK_COEF = 0.8f;
 
     public Void startWebParser(SiteModel site) {
         Iterable<PageModel> pageList = pageRepository.findBySiteId(site);
         List<LemmaModel> lemmaList = lemmaRepository.findBySiteModelId(site);
         config = new ArrayList<>();
-        final float RANK_COEF = 0.8f;
         for (PageModel page : pageList) {
             if (page.getCode() < 400) {
                 long pageId = page.getId();
@@ -47,31 +48,36 @@ public class WebParser {
                 String body = clearCodeFromTag(content, "body");
                 Map<String, Integer> titleSiteList = lemmaEngine.getLemmaMap(title);
                 Map<String, Integer> bodySiteList = lemmaEngine.getLemmaMap(body);
-                float totalRank = 0.0f;
-                float titleRank;
-                float bodyRank;
-                for (LemmaModel lemma : lemmaList) {
-                    long lemmaId = lemma.getId();
-                    String keyWord = lemma.getLemma();
-                    if (titleSiteList.containsKey(keyWord) || bodySiteList.containsKey(keyWord)) {
-                        if (titleSiteList.get(keyWord) != null) {
-                            titleRank = titleSiteList.get(keyWord);
-                            totalRank += titleRank;
-                        }
-                        if (bodySiteList.get(keyWord) != null) {
-                            bodyRank = bodySiteList.get(keyWord) * RANK_COEF;
-                            totalRank += bodyRank;
-                        }
-                        config.add(new IndexDto(pageId, lemmaId, totalRank));
-                    } else {
-                        log.debug("Lemma not found");
-                    }
-                }
+                lemmas(lemmaList, titleSiteList, bodySiteList, pageId);
             } else {
                 log.debug("Bad status code - " + page.getCode());
             }
         }
         return null;
+    }
+
+    private void lemmas(List<LemmaModel> lemmaList, Map<String, Integer> titleSiteList, Map<String, Integer> bodySiteList,
+                        long pageId) {
+        for (LemmaModel lemma : lemmaList) {
+            float totalRank = 0.0f;
+            float titleRank;
+            float bodyRank;
+            long lemmaId = lemma.getId();
+            String keyWord = lemma.getLemma();
+            if (titleSiteList.containsKey(keyWord) || bodySiteList.containsKey(keyWord)) {
+                if (titleSiteList.get(keyWord) != null) {
+                    titleRank = titleSiteList.get(keyWord);
+                    totalRank += titleRank;
+                }
+                if (bodySiteList.get(keyWord) != null) {
+                    bodyRank = bodySiteList.get(keyWord) * RANK_COEF;
+                    totalRank += bodyRank;
+                }
+                config.add(new IndexDto(pageId, lemmaId, totalRank));
+            } else {
+                log.debug("Lemma not found");
+            }
+        }
     }
 
     public String clearCodeFromTag(String content, String s) {

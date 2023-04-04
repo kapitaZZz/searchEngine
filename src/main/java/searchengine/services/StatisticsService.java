@@ -1,5 +1,6 @@
 package searchengine.services;
 
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import searchengine.dto.statistics.DetailedStatisticsItem;
 import searchengine.dto.statistics.StatisticsData;
@@ -16,8 +17,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public record StatisticsService(PageRepository pageRepository, LemmaRepository lemmaRepository,
-                                SiteRepository siteRepository) {
+@AllArgsConstructor
+public class StatisticsService {
+
+    private final PageRepository pageRepository;
+    private final LemmaRepository lemmaRepository;
+
+    private final SiteRepository siteRepository;
 
     private TotalStatistics getTotalStatistics() {
         long sites = siteRepository.count();

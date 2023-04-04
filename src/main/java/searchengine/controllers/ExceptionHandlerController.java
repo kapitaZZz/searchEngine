@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import searchengine.dto.response.ResultDTO;
-import searchengine.exception.CurrentRuntimeException;
+import searchengine.dto.exception.CurrentRuntimeException;
 
 @RestControllerAdvice
 public record ExceptionHandlerController() {

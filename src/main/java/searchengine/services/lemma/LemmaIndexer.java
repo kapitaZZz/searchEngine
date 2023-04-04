@@ -52,8 +52,9 @@ public class LemmaIndexer {
                 lemmaList.put(word, frequency);
             });
         }
-        for (String lemma : lemmaList.keySet()) {
-            Integer frequency = lemmaList.get(lemma);
+        for (Map.Entry<String, Integer> entry : lemmaList.entrySet()) {
+            String lemma = entry.getKey();
+            Integer frequency = entry.getValue();
             lemmaDtoList.add(new LemmaDto(lemma, frequency));
         }
     }

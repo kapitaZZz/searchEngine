@@ -31,16 +31,11 @@ public class PageIndexer extends RecursiveTask<List<PageDto>> {
         try {
             Thread.sleep(100);
             Document doc = null;
-            try {
-                Thread.sleep(100);
-                doc = Jsoup.connect(url)
-                        .userAgent(config.getUserAgent())
-                        .referrer(config.getReferrer())
-                        .get();
-            } catch (Exception e) {
-                e.getMessage();
-            }
-            assert doc != null;
+            Thread.sleep(100);
+            doc = Jsoup.connect(url)
+                    .userAgent(config.getUserAgent())
+                    .referrer(config.getReferrer())
+                    .get();
             String html = doc.outerHtml();
             Connection.Response response = doc.connection().response();
             int status = response.statusCode();
@@ -74,8 +69,8 @@ public class PageIndexer extends RecursiveTask<List<PageDto>> {
     }
 
     private boolean isSiteElementsType(String pathPage) {
-        List<String> WRONG_TYPES = Arrays.asList(
+        List<String> wrongTypes = Arrays.asList(
                 "JPG", "gif", "gz", "jar", "jpeg", "jpg", "pdf", "png", "ppt", "pptx", "svg", "svg", "tar", "zip");
-        return !WRONG_TYPES.contains(pathPage.substring(pathPage.lastIndexOf(".") + 1));
+        return !wrongTypes.contains(pathPage.substring(pathPage.lastIndexOf(".") + 1));
     }
 }

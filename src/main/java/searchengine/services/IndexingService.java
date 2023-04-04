@@ -41,7 +41,6 @@ public class IndexingService {
             new ResultDTO(false, "Индексация уже запущена").getError();
 
         } else {
-
             List<Site> siteList = config.getSites();
             executorService = Executors.
                     newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -81,11 +80,11 @@ public class IndexingService {
     }
 
     public boolean indexPage(String urlPage) {
-
         if (isUrlSiteEquals(urlPage)) {
             log.info("Начата переиндексация сайта - " + urlPage);
             executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-            executorService.submit(new SiteIndexed(pageRepository, siteRepository, lemmaRepository, indexRepository, lemmaIndexer, webParser, urlPage, config));
+            executorService.submit(new SiteIndexed(pageRepository, siteRepository, lemmaRepository, indexRepository,
+                    lemmaIndexer, webParser, urlPage, config));
             executorService.shutdown();
             return true;
         } else {
@@ -97,5 +96,4 @@ public class IndexingService {
     private boolean isUrlSiteEquals(String url) {
         return config.getSites().stream().anyMatch(site -> site.getUrl().equals(url));
     }
-
 }

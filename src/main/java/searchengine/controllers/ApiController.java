@@ -53,7 +53,8 @@ public record ApiController(StatisticsService statisticsService, IndexingService
                 return new ResultDTO(true, HttpStatus.OK);
             } else {
                 log.info("Указанная страница" + "за пределами конфигурационного файла");
-                return new ResultDTO(false, "Указанная страница" + "за пределами конфигурационного файла", HttpStatus.BAD_REQUEST);
+                return new ResultDTO(false,
+                        "Указанная страница" + "за пределами конфигурационного файла", HttpStatus.BAD_REQUEST);
             }
         }
     }
