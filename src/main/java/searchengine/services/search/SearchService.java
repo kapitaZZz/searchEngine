@@ -7,6 +7,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
+import searchengine.dto.LemmaDto;
 import searchengine.dto.SearchDto;
 import searchengine.dto.exception.CurrentIOException;
 import searchengine.lemma.LemmaEngine;
@@ -35,13 +36,13 @@ public class SearchService {
     private final IndexRepository indexRepository;
 
     private List<SearchDto> getSearchDtoList(ConcurrentHashMap<PageModel, Float> pageList,
-                                             List<String> textLemmaList) {
+                                             List<String> textLemmaList) throws CurrentIOException {
         List<SearchDto> searchDtoList = new ArrayList<>();
         StringBuilder titleStringBuilder = new StringBuilder();
-        for (PageModel page : pageList.keySet()) {
-            String uri = page.getPath();
-            String content = page.getContent();
-            SiteModel pageSite = page.getSiteId();
+        for (Map.Entry<PageModel, Float> page : pageList.entrySet()) {
+            String uri = page.getKey().getPath();
+            String content = page.getKey().getContent();
+            SiteModel pageSite = page.getKey().getSiteId();
             String site = pageSite.getUrl();
             String siteName = pageSite.getName();
             String title = clearCodeFromTag(content, "title");
@@ -55,7 +56,8 @@ public class SearchService {
                 try {
                     lemmaIndex.addAll(lemmaEngine.findLemmaIndexInText(titleStringBuilder.toString(), lemma));
                 } catch (IOException e) {
-                    new CurrentIOException(e.getMessage());
+                    log.debug(e.getMessage());
+                    throw new CurrentIOException(e.getMessage());
                 }
                 i++;
             }
@@ -152,7 +154,7 @@ public class SearchService {
         return result;
     }
 
-    public List<String> getLemmaFromSearchText(String text) {
+    public List<String> getLemmaFromSearchText(String text) throws CurrentIOException {
         String[] words = text.toLowerCase(Locale.ROOT).split(" ");
         List<String> lemmaList = new ArrayList<>();
         int i = 0;
@@ -163,7 +165,8 @@ public class SearchService {
                 list = lemmaEngine.getLemma(lemma);
                 lemmaList.addAll(list);
             } catch (IOException e) {
-                new CurrentIOException(e.getMessage());
+                log.debug(e.getMessage());
+                throw new CurrentIOException(e.getMessage());
             }
             i++;
         }
@@ -172,7 +175,7 @@ public class SearchService {
 
     public List<SearchDto> createSearchDtoList(List<LemmaModel> lemmaList,
                                                List<String> textLemmaList,
-                                               int start, int limit) {
+                                               int start, int limit) throws CurrentIOException {
         List<SearchDto> result = new ArrayList<>();
         pageRepository.flush();
         if (lemmaList.size() >= textLemmaList.size()) {

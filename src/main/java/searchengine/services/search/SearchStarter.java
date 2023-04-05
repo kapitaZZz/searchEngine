@@ -1,22 +1,27 @@
-package searchengine.search;
+package searchengine.services.search;
 
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import searchengine.dto.SearchDto;
+import searchengine.dto.exception.CurrentIOException;
 import searchengine.model.LemmaModel;
 import searchengine.model.SiteModel;
 import searchengine.repository.SiteRepository;
-import searchengine.services.search.SearchService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public record SearchStarter(SiteRepository siteRepository, SearchService searchService) {
+@AllArgsConstructor
+public class SearchStarter {
+
+    private final SiteRepository siteRepository;
+    private final SearchService searchService;
 
     public List<SearchDto> getSearchFromOneSite(String text,
                                                 String url,
                                                 int start,
-                                                int limit) {
+                                                int limit) throws CurrentIOException {
         SiteModel site = siteRepository.findByUrl(url);
         List<String> textLemmaList = searchService.getLemmaFromSearchText(text);
         List<LemmaModel> foundLemmaList = searchService.getLemmaModelFromSite(textLemmaList, site);
@@ -25,7 +30,7 @@ public record SearchStarter(SiteRepository siteRepository, SearchService searchS
 
     public List<SearchDto> getFullSearch(String text,
                                          int start,
-                                         int limit) {
+                                         int limit) throws CurrentIOException {
         List<SiteModel> siteList = siteRepository.findAll();
         List<SearchDto> result = new ArrayList<>();
         List<LemmaModel> foundLemmaList = new ArrayList<>();

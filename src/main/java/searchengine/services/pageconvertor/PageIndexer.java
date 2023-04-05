@@ -29,9 +29,8 @@ public class PageIndexer extends RecursiveTask<List<PageDto>> {
     @Override
     protected List<PageDto> compute() {
         try {
-            Thread.sleep(100);
+            Thread.sleep(150);
             Document doc = null;
-            Thread.sleep(100);
             doc = Jsoup.connect(url)
                     .userAgent(config.getUserAgent())
                     .referrer(config.getReferrer())

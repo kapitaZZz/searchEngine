@@ -1,18 +1,18 @@
 package searchengine.controllers;
 
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import searchengine.dto.exception.CurrentIOException;
 import searchengine.dto.response.ResultDTO;
 import searchengine.dto.SearchDto;
 import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.repository.SiteRepository;
 import searchengine.services.IndexingService;
 import searchengine.services.StatisticsService;
-import searchengine.search.SearchStarter;
+import searchengine.services.search.SearchStarter;
 
 import java.util.List;
 
@@ -66,17 +66,21 @@ public record ApiController(StatisticsService statisticsService, IndexingService
                             @RequestParam(name = "site", required = false, defaultValue = "") String site,
                             @RequestParam(name = "offset", required = false, defaultValue = "0") int offset) {
         List<SearchDto> searchData;
-        if (!site.isEmpty()) {
-            if (siteRepository.findByUrl(site) == null) {
+        try {
+            if (!site.isEmpty()) {
+                if (siteRepository.findByUrl(site) == null) {
 
-                return new ResultDTO(false, "Данная страница находится за пределами сайтов,\n" +
-                        "указанных в конфигурационном файле", HttpStatus.BAD_REQUEST);
+                    return new ResultDTO(false, "Данная страница находится за пределами сайтов,\n" +
+                            "указанных в конфигурационном файле", HttpStatus.BAD_REQUEST);
+                } else {
+                    searchData = searchStarter.getSearchFromOneSite(query, site, offset, 30);
+                }
             } else {
-                searchData = searchStarter.getSearchFromOneSite(query, site, offset, 30);
+                searchData = searchStarter.getFullSearch(query, offset, 30);
             }
-        } else {
-            searchData = searchStarter.getFullSearch(query, offset, 30);
+            return new ResultDTO(true, searchData.size(), searchData, HttpStatus.OK);
+        } catch (CurrentIOException e) {
+            throw new RuntimeException(e);
         }
-        return new ResultDTO(true, searchData.size(), searchData, HttpStatus.OK);
     }
 }

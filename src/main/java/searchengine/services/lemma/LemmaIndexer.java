@@ -35,7 +35,6 @@ public class LemmaIndexer {
         Map<String, Integer> titleSiteList;
         Map<String, Integer> bodySiteList;
         Set<String> allWordsInIndexingSite = new HashSet<>();
-        ;
         String content;
         String title;
         String body;
