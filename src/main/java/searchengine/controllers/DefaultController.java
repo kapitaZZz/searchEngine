@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-public record DefaultController() {
+public class DefaultController {
 
     @ApiOperation("Open main page 'Index'")
     @RequestMapping("/")

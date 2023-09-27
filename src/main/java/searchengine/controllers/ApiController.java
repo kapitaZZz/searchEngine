@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import searchengine.dto.SearchDto;
 import searchengine.dto.exception.CurrentIOException;
 import searchengine.dto.response.ResultDTO;
-import searchengine.dto.SearchDto;
 import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.repository.SiteRepository;
 import searchengine.services.IndexingService;
@@ -19,8 +19,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @Slf4j
-public record ApiController(StatisticsService statisticsService, IndexingService indexingService,
-                            SiteRepository siteRepository, SearchStarter searchStarter) {
+public class ApiController {
+
+    private StatisticsService statisticsService;
+    private IndexingService indexingService;
+    private SiteRepository siteRepository;
+    private SearchStarter searchStarter;
 
     @ApiOperation("Get all statistics")
     @GetMapping("/statistics")
